@@ -9,7 +9,7 @@ try{
   const user=await payload.create({collection:'users',data:{email:id+'@example.invalid',password:randomUUID()+'aA1!',role:'editor'},overrideAccess:true})
   ids.users.push(user.id)
   const editor={...user,role:'editor',collection:'users' as const}
-  await assert.rejects(()=>payload.create({collection:'users',data:{email:'blocked-'+id+'@example.invalid',password:randomUUID()},user:editor,overrideAccess:false}))
+  await assert.rejects(()=>payload.create({collection:'users',data:{email:'blocked-'+id+'@example.invalid',password:randomUUID(),role:'editor'},user:editor,overrideAccess:false}))
   await assert.rejects(()=>payload.updateGlobal({slug:'site-settings',data:{phone:'blocked'},user:editor,overrideAccess:false}))
   const doc=await payload.create({collection:'content',locale:'zh',data:{kind:'resources',slug:'check-'+id,title:'测试草稿',intro:'测试内容',sections:[{title:'说明',text:'草稿不可公开'}],_status:'draft'},overrideAccess:true})
   ids.content.push(doc.id)
@@ -26,4 +26,3 @@ try{
   for(const value of ids.users)await payload.delete({collection:'users',id:value,overrideAccess:true})
   await payload.destroy()
 }
-
