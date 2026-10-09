@@ -1,39 +1,33 @@
-# KUANKI cloud development
-江苏匡集工业科技有限公司 / Jiangsu Kuanki Industry&Technology Co., Ltd
+# KUANKI bilingual industrial website
 
-This is the initial development environment, not the finished marketing website.
+Jiangsu Kuanki Industry&Technology Co., Ltd / 江苏匡集工业科技有限公司
 
-## Codespaces
-1. Source is hosted at https://github.com/MikeTsui-ops/kuanki (public, explicitly approved by the owner). Keep Codespaces preview ports private.
-2. Code → Codespaces → Create codespace. The committed devcontainer starts Node.js 22 and PostgreSQL 17.
-3. Wait for setup: pinned pnpm install, lockfile installation, local secret generation, Payload import-map generation, TypeScript check.
-4. Run `pnpm dev`.
-5. Open **private** port 3000. Check `/zh`, `/en`, and `/admin`.
-6. Create your own first CMS administrator at `/admin`. Never make the port public before this step.
-7. Enter a draft page in Chinese and English, upload a sample image, restart the development server and verify persistence.
+Next.js 16 + TypeScript + Tailwind CSS + shadcn/ui + Payload CMS + PostgreSQL.
 
-## Commands
-- `pnpm dev`: development server
-- `pnpm typecheck`: static validation
-- `pnpm build`: production compilation (requires correct environment and PostgreSQL)
-- `pnpm generate:importmap`: refresh CMS component map
-- `pnpm generate:types`: generate content types
-- `pnpm payload migrate:create`: prepare reviewed database migrations for future production
+## Start in Codespaces
+Keep preview port 3000 **private**. On a new Codespace, initialization installs dependencies, generates an ignored local secret, checks types and imports bilingual baseline content.
 
-## Data and security
-- PostgreSQL has no public or forwarded port. The committed password is **development-only**, inside the isolated compose network.
-- Database uses a named Docker volume. Stop/restart preserves it; deleting a Codespace can destroy development data. Export important content first.
-- Uploads live in ignored `media/` inside the Codespace. Production must use durable object storage.
-- `.env` is generated on first setup with a random secret, ignored by Git and preserved on re-run. No production credentials belong in Git.
-- Preview HTML has noindex metadata, all responses have a noindex header, and robots disallows crawling. Ports remain private.
-- CMS accounts/media require authentication. Pages expose only published content to unauthenticated API requests.
-- Codespaces is for development and may stop when idle; it is **not** production hosting. Check your GitHub usage allowance before starting.
-- No real customer data or production inquiries should be stored here.
+For an existing Codespace:
+```bash
+git pull --ff-only
+pnpm install --frozen-lockfile
+pnpm generate:importmap
+pnpm payload run scripts/seed-content.ts
+pnpm dev
+```
+Open `/zh`, `/en` or `/admin`. The first registered CMS user becomes administrator.
 
-## Brand assets
-- `assets/original/logo.svg`: unchanged original Illustrator SVG.
-- `public/brand/logo.svg`: same artwork and brand color #D93924, with the viewBox cropped to the actual mark.
-- The preview logo is served locally; no external font or image dependency.
+## Features
+- Responsive bilingual homepage, divisions, products, industries, case-study slots, technical articles, credentials, company, contact and privacy pages.
+- CMS drafts and localized content, public-media approval, downloadable documents, administrator/editor access.
+- Server-validated database inquiries, idempotency, basic rate limiting, consent and campaign attribution.
+- Canonical/hreflang metadata, breadcrumbs, organization/article structured data, production sitemap, preview noindex.
+- Local brand assets and original conceptual engineering illustrations.
 
-## Scope still to implement
-Full site templates, product/case content models, editable homepage, production SEO and sitemap, inquiry workflow, production storage, analytics consent, and launch verification remain future work.
+## Validation
+`pnpm typecheck` and `pnpm build` validate the application. GitHub Actions also provisions PostgreSQL, verifies draft/access rules and bilingual publishing, seeds content, and tests real inquiry persistence and private inquiry access.
+
+## Production is separate
+Codespaces is a development environment, not permanent hosting. Domain, production database/object storage, backups, email notifications, analytics providers and remaining corporate materials must be configured before launch. Do not store production credentials in Git.
+
+[Chinese operating guide](docs/WEBSITE_HANDOVER.zh-CN.md)

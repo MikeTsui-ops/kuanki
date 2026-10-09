@@ -6,5 +6,5 @@ pnpm dev:setup
 pnpm generate:importmap
 pnpm exec next typegen
 pnpm typecheck
+pnpm payload run scripts/seed-content.ts
 printf '\nReady. Run pnpm dev, then open the private port 3000.\n'
-

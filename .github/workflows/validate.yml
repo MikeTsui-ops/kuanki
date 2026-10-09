@@ -26,6 +26,7 @@ jobs:
       DATABASE_URL: postgresql://kuanki:kuanki_ci_only@127.0.0.1:5432/kuanki
       SITE_ENV: preview
       NEXT_TELEMETRY_DISABLED: '1'
+      CONTENT_SOURCE: cms
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,4 +38,14 @@ jobs:
       - run: pnpm generate:importmap
       - run: pnpm exec next typegen
       - run: pnpm typecheck
+      - run: pnpm payload run scripts/verify-cms.ts
+      - run: pnpm payload run scripts/seed-content.ts
       - run: pnpm build
+      - name: Verify website and inquiries
+        run: |
+          pnpm start > /tmp/kuanki-server.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://localhost:3000/zh > /dev/null; then break; fi
+            sleep 2
+          done
+          node scripts/smoke.mjs
