@@ -1,0 +1,40 @@
+name: Validate cloud development
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-bookworm
+        env:
+          POSTGRES_USER: kuanki
+          POSTGRES_PASSWORD: kuanki_ci_only
+          POSTGRES_DB: kuanki
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kuanki -d kuanki"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://kuanki:kuanki_ci_only@127.0.0.1:5432/kuanki
+      SITE_ENV: preview
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --global pnpm@10.28.2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm dev:setup
+      - run: pnpm generate:importmap
+      - run: pnpm exec next typegen
+      - run: pnpm typecheck
+      - run: pnpm build
