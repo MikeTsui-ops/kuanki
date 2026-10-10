@@ -61,7 +61,16 @@ const Inquiries: CollectionConfig = {
   ],
 }
 export default buildConfig({
-  admin:{user:'users',importMap:{baseDir:dirname}},
+  admin:{user:'users',importMap:{baseDir:dirname},livePreview:{
+    collections:['content'],globals:['site-settings'],openByDefault:true,
+    breakpoints:[{name:'mobile',label:'手机 / Mobile',width:390,height:844},{name:'tablet',label:'平板 / Tablet',width:768,height:1024},{name:'desktop',label:'桌面 / Desktop',width:1440,height:900}],
+    url:({data,locale,collectionConfig,req})=>{
+      const base=new URL(req.url || process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000').origin
+      const query=new URLSearchParams({type:collectionConfig?.slug==='content'?'content':'settings'})
+      if(collectionConfig?.slug==='content'&&data.id)query.set('id',String(data.id))
+      return `${base}/live-preview/${locale.code==='en'?'en':'zh'}?${query}`
+    },
+  }},
   secret:process.env.PAYLOAD_SECRET || '',serverURL:process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
   localization:{locales:[{label:'简体中文',code:'zh'},{label:'English',code:'en'}],defaultLocale:'zh',fallback:false},
   db:postgresAdapter({pool:{connectionString:process.env.DATABASE_URL || ''},push:process.env.SITE_ENV!=='production'}),

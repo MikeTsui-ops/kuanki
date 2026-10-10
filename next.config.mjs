@@ -6,9 +6,8 @@ export default withPayload({
     ? [process.env.CODESPACE_NAME + '-3000.' + (process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN || 'app.github.dev')]
     : [],
   async headers() {
-    return process.env.SITE_ENV === 'production' ? [] : [
+    return [{source:'/live-preview/:path*',headers:[{key:'X-Robots-Tag',value:'noindex, nofollow, noarchive'},{key:'Cache-Control',value:'private, no-store'},{key:'Content-Security-Policy',value:"frame-ancestors 'self'"}]} , ...(process.env.SITE_ENV === 'production' ? [] : [
       { source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }] },
-    ]
+    ])]
   },
 })
-
